@@ -52,6 +52,7 @@ struct Scene {
 	struct Drawable {
 		//a 'Drawable' attaches attribute data to a transform:
 		Drawable(Transform *transform_) : transform(transform_) { assert(transform); }
+		Drawable() = default;
 		Transform * transform;
 
 		//Contains all the data needed to run the OpenGL pipeline:

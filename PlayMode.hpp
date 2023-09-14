@@ -1,9 +1,11 @@
 #include "Mode.hpp"
 
 #include "Scene.hpp"
+#include "Mesh.hpp"
 
 #include <glm/glm.hpp>
 
+#include <stdint.h>
 #include <vector>
 #include <deque>
 
@@ -24,17 +26,39 @@ struct PlayMode : Mode {
 		uint8_t pressed = 0;
 	} left, right, down, up;
 
+	struct Boundingbox {
+		glm::vec3 min = glm::vec3(0.0f);
+		glm::vec3 max = glm::vec3(0.0f);
+	};
+
+	struct Ray {
+		glm::vec3 point = glm::vec3(0.0f);
+		glm::vec3 dir = glm::vec3(0.0f);
+	};
+
+	struct UFO {
+		unsigned int id = 0;
+		Boundingbox boundingbox;
+		Scene::Transform * transform = nullptr;
+	};
+	
+	bool hit(Ray, Boundingbox);
+	void SpawnUFO(unsigned int, float);
+
 	//local copy of the game scene (so code can change it during gameplay):
 	Scene scene;
 
-	//hexapod leg to wobble:
-	Scene::Transform *hip = nullptr;
-	Scene::Transform *upper_leg = nullptr;
-	Scene::Transform *lower_leg = nullptr;
-	glm::quat hip_base_rotation;
-	glm::quat upper_leg_base_rotation;
-	glm::quat lower_leg_base_rotation;
-	float wobble = 0.0f;
+	
+	std::vector<UFO> UFOs;
+	unsigned int score = 0;
+	int lives = 3;
+	unsigned int UFO_nums = 0;
+	float UFO_spawn_time = 2.0f;
+	float elapsed_time = 0.0f;
+	bool game_over = false;
+
+	Mesh UFO_mesh;
+	Scene::Drawable UFO_instance;
 	
 	//camera:
 	Scene::Camera *camera = nullptr;

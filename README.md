@@ -1,8 +1,8 @@
-# (TODO: your game's title)
+# Protect the Core
 
-Author: (TODO: your name)
+Author: Haoxi Zhang
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design: You need to change view to defend attack.
 
 Screen Shot:
 
@@ -10,6 +10,6 @@ Screen Shot:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+use WASD and mouse to change views. Protext the core.
 
 This game was built with [NEST](NEST.md).
