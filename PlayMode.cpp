@@ -1,6 +1,7 @@
 #include "PlayMode.hpp"
 
 #include "LitColorTextureProgram.hpp"
+#include "CustomizedShaderProgram.hpp"
 
 #include "DrawLines.hpp"
 #include "Mesh.hpp"
@@ -14,10 +15,12 @@
 #include <stdio.h>
 #include <vcruntime.h>
 
-GLuint hexapod_meshes_for_lit_color_texture_program = 0;
+GLuint base_meshes_for_lit_color_texture_program = 0;
+GLuint base_meshes_for_customized_shader = 0;
 Load< MeshBuffer > hexapod_meshes(LoadTagDefault, []() -> MeshBuffer const * {
 	MeshBuffer const *ret = new MeshBuffer(data_path("base.pnct"));
-	hexapod_meshes_for_lit_color_texture_program = ret->make_vao_for_program(lit_color_texture_program->program);
+	base_meshes_for_lit_color_texture_program = ret->make_vao_for_program(lit_color_texture_program->program);
+	base_meshes_for_customized_shader = ret->make_vao_for_program(customized_shader_program->program);
 	return ret;
 });
 
@@ -30,7 +33,7 @@ Load< Scene > hexapod_scene(LoadTagDefault, []() -> Scene const * {
 
 		drawable.pipeline = lit_color_texture_program_pipeline;
 
-		drawable.pipeline.vao = hexapod_meshes_for_lit_color_texture_program;
+		drawable.pipeline.vao = base_meshes_for_lit_color_texture_program;
 		drawable.pipeline.type = mesh.type;
 		drawable.pipeline.start = mesh.start;
 		drawable.pipeline.count = mesh.count;
@@ -117,6 +120,7 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 	printf("successfully get UFO\n");
 
 	UFO_mesh = hexapod_meshes->lookup("OUFO");
+	Base_mesh = hexapod_meshes->lookup("Base");
 	
 	UFO_nums = 0;
 
@@ -277,6 +281,17 @@ void PlayMode::update(float elapsed) {
 				if (glm::length(drawable.transform->position) < 0.5f) {
 					// printf("UFO hit player!\n");
 					lives -= 1;
+					if (lives == 2) {
+						for (auto &base_drawable : scene.drawables) {
+							if (base_drawable.transform->name == "Base") {
+								base_drawable.pipeline = customized_shader_program_pipeline;
+								base_drawable.pipeline.vao = base_meshes_for_customized_shader;
+								base_drawable.pipeline.type = Base_mesh.type;
+								base_drawable.pipeline.start = Base_mesh.start;
+								base_drawable.pipeline.count = Base_mesh.count;
+							}
+						}
+					}
 					if (lives == 0) {
 						game_over = true;
 					}
@@ -306,6 +321,13 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	glUniform1i(lit_color_texture_program->LIGHT_TYPE_int, 1);
 	glUniform3fv(lit_color_texture_program->LIGHT_DIRECTION_vec3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f,-1.0f)));
 	glUniform3fv(lit_color_texture_program->LIGHT_ENERGY_vec3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.95f)));
+	glUseProgram(0);
+
+	glUseProgram(customized_shader_program->program);
+	glUniform1i(customized_shader_program->LIGHT_TYPE_int, 1);
+	glUniform1i(customized_shader_program->TIME_int, rand() % 100);
+	glUniform3fv(customized_shader_program->LIGHT_DIRECTION_vec3, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f,-1.0f)));
+	glUniform3fv(customized_shader_program->LIGHT_ENERGY_vec3, 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 0.95f)));
 	glUseProgram(0);
 
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);

@@ -58,6 +58,7 @@ struct PlayMode : Mode {
 	bool game_over = false;
 
 	Mesh UFO_mesh;
+	Mesh Base_mesh;
 	Scene::Drawable UFO_instance;
 	
 	//camera:
